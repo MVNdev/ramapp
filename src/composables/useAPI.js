@@ -1,32 +1,21 @@
-import { ref, reactive, computed } from 'vue';
-import axios from 'axios';
+import { ref } from 'vue'
+import axios from 'axios'
 
 export function useApi(apiUrl) {
-  const state = reactive({
-    data: ref(null),
-    error: ref(null),
-    loading: ref(false),
-  });
+  const data = ref([])
+  const error = ref(null)
+  const loading = ref(true)
 
-  const fetchData = async () => {
-    state.loading = true;
+  const loadData = async () => {
     try {
-      const response = await axios.get(apiUrl);
-      state.data = response.data;
-    } catch (error) {
-      state.error = error;
+      const res = await axios.get(apiUrl)
+      data.value.push(res.data)
+    } catch (err) {
+      error.value = err.message
     } finally {
-      state.loading = false;
+      loading.value = false
     }
-  };
+  }
 
-  const computedDataLength = computed(() => {
-    return state.data ? state.data.length : 0;
-  });
-
-  return {
-    ...state,
-    fetchData,
-    computedDataLength,
-  };
+  return { data, error, loading, loadData }
 }
